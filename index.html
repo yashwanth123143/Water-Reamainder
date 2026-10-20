@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="A water reminder with a daily goal, aquarium rewards and sync across devices.">
+  <title>Water Break</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Water Break</h1>
+    <div class="head-right">
+      <span class="chip" id="sync-chip" role="status">Local only</span>
+      <span class="chip" id="streak-chip">Streak 0 days</span>
+      <span class="date" id="today-label"></span>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" role="alert" hidden>
+    <div>
+      <strong>Time to drink water</strong>
+      <span id="banner-sub">Have a glass, then tap the button.</span>
+    </div>
+    <div class="actions">
+      <button id="b-drink">I drank a glass</button>
+      <button id="b-snooze" class="ghost">Snooze 5 min</button>
+    </div>
+  </div>
+
+  <section class="card auth" id="auth-card" aria-label="Sync" hidden>
+    <div id="auth-out">
+      <p class="label">Sync across devices</p>
+      <form id="auth-form" class="auth-row">
+        <input id="auth-email" type="email" placeholder="Email" autocomplete="email" required aria-label="Email address">
+        <input id="auth-password" type="password" placeholder="Password (6+ characters)" autocomplete="current-password" minlength="6" required aria-label="Password">
+        <button class="primary" id="auth-signin" type="submit">Sign in</button>
+        <button id="auth-create" type="button">Create account</button>
+      </form>
+      <p class="note" id="auth-msg">Sign in to keep your goal, history and fish on every device. Optional.</p>
+    </div>
+    <div id="auth-in" class="auth-row" hidden>
+      <span>Signed in as <b id="auth-who"></b></span>
+      <button id="signout" type="button">Sign out</button>
+    </div>
+  </section>
+
+  <div class="main">
+    <section class="card glass-card" aria-label="Today's progress">
+      <svg viewBox="0 0 200 260" role="img" id="glass-svg" aria-label="Glass showing progress toward the daily goal">
+        <defs>
+          <clipPath id="glass-clip"><path d="M30 20 L170 20 L152 236 Q151 244 143 244 L57 244 Q49 244 48 236 Z"/></clipPath>
+        </defs>
+        <g clip-path="url(#glass-clip)">
+          <rect x="0" y="0" width="200" height="260" fill="var(--bg)"/>
+          <g id="water-level" style="transition: transform 0.9s ease;" transform="translate(0,244)">
+            <rect x="-80" y="8" width="420" height="260" fill="var(--water)" opacity="0.9"/>
+            <g class="wave">
+              <path d="M-80 8 Q-65 -2 -50 8 T-20 8 T10 8 T40 8 T70 8 T100 8 T130 8 T160 8 T190 8 T220 8 T250 8 T280 8 T310 8 T340 8 V30 H-80 Z" fill="var(--water)"/>
+            </g>
+          </g>
+        </g>
+        <path d="M30 20 L170 20 L152 236 Q151 244 143 244 L57 244 Q49 244 48 236 Z" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="tally"><span id="count">0</span> <small>/ <span id="goal-show">8</span> glasses</small></div>
+        <div class="litres" id="litres"></div>
+      </div>
+      <div class="drink-row">
+        <button class="primary" id="drink">I drank a glass</button>
+        <button id="undo" aria-label="Remove one glass">−1</button>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="card" aria-label="Reminders">
+        <div class="next">
+          <div>
+            <p class="label">Next reminder in</p>
+            <div class="countdown" id="countdown">--:--</div>
+            <div class="status" id="status"><span class="dot"></span><span id="status-text">Reminders are off</span></div>
+          </div>
+          <button class="primary" id="toggle">Start reminders</button>
+        </div>
+
+        <div class="fields" style="margin-top:20px">
+          <div class="field">
+            <label for="interval">Remind me every</label>
+            <select id="interval">
+              <option value="15">15 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="90">90 minutes</option>
+              <option value="120">2 hours</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="goal">Daily goal (glasses)</label>
+            <input id="goal" type="number" min="1" max="20" step="1">
+          </div>
+          <div class="field">
+            <label for="start">Start of day</label>
+            <input id="start" type="time">
+          </div>
+          <div class="field">
+            <label for="end">End of day</label>
+            <input id="end" type="time">
+          </div>
+          <div class="field">
+            <label for="glassml">Glass size (ml)</label>
+            <input id="glassml" type="number" min="100" max="1000" step="50">
+          </div>
+          <div class="toggle">
+            <input id="sound" type="checkbox">
+            <label for="sound">Play a chime with each reminder</label>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="test">Test reminder</button>
+          <button id="preview-reward">Preview reward</button>
+        </div>
+        <p class="note" id="notif-note"></p>
+      </section>
+
+      <section class="card" aria-label="Last 7 days">
+        <p class="label">Last 7 days</p>
+        <div class="week" id="week"></div>
+        <p class="note">Darker bars reached the daily goal.</p>
+      </section>
+
+      <section class="card" aria-label="Aquarium">
+        <p class="label">Your aquarium</p>
+        <div class="tank" id="tank"></div>
+        <div class="tank-meta" id="tank-meta"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="reward-title" hidden>
+  <div class="card reward">
+    <div class="big-fish" id="reward-fish"></div>
+    <span class="badge" id="reward-badge" hidden></span>
+    <h2 id="reward-title">Goal reached!</h2>
+    <p id="reward-text"></p>
+    <p id="reward-streak"></p>
+    <button class="primary" id="reward-close">Nice</button>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
